@@ -22,6 +22,6 @@ print(selected_features)
 # Salva il nuovo dataset con le feature selezionate
 selected_data = pd.DataFrame(X_new, columns=selected_features)
 selected_data['PunteggioImpattoAmbientale'] = y  # Riaggiungo la colonna target
-selected_data.to_csv('../../datasets/ready_to_use/selected_features_impatto_ambientale.csv', index=False)
+selected_data.to_csv('../../datasets/ready_to_use/for_prediction.csv', index=False)
 
-print("Dataset con feature selezionate salvato come 'selected_features_impatto_ambientale.csv'.")
+print("Dataset con feature selezionate salvato come 'for_prediction.csv'.")
