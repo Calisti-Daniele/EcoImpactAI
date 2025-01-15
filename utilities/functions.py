@@ -1,15 +1,14 @@
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-
+import joblib
 
 def load_dataset(path):
-
     df = pd.read_csv(path)
 
     return df
 
-def encode_categorical(df):
 
+def encode_categorical(df):
     encoding_maps = {
         "TipoEdificio": {"Residenziale": 0, "Commerciale": 1, "Industriale": 2},
         "Materiale": {"Cemento": 0, "Legno": 1, "Acciaio": 2, "Misto": 3},
@@ -23,11 +22,14 @@ def encode_categorical(df):
 
     return df
 
-def normalizza_feature_numeriche(df):
+
+def normalizza_feature_numeriche(df, scaler_path):
     # Normalizzazione delle feature numeriche
     scaler = MinMaxScaler()
     numerical_columns = df.select_dtypes(include=["float64", "int64"]).columns.drop("PunteggioImpattoAmbientale")
     df[numerical_columns] = scaler.fit_transform(df[numerical_columns])
+
+    joblib.dump(scaler, scaler_path)  # Salva lo scale
 
     return df
 
@@ -42,5 +44,21 @@ def create_new_features(df):
 
     # 3. Efficienza energetica normalizzata inversa
     df["EfficienzaInversa"] = 1 - df["EfficienzaEnergetica"]
+
+    return df
+
+
+def set_df_for_web_prediction(df, scaler_path):
+
+    scaler = joblib.load(scaler_path)
+
+    # Calcola la colonna "EfficienzaInversa"
+    df["EfficienzaInversa"] = 1 - df["EfficienzaEnergetica"]
+
+    # Normalizza le colonne numeriche
+    numerical_columns = df.select_dtypes(include=["float64", "int64"]).columns
+    df[numerical_columns] = scaler.transform(df[numerical_columns])
+
+
 
     return df

@@ -1,8 +1,10 @@
 from sklearn.feature_selection import SelectKBest, f_regression
 import pandas as pd
 
+from utilities.functions import normalizza_feature_numeriche
+
 # Carica il dataset
-data = pd.read_csv('../../datasets/ready_to_use/normalized_impatto_ambientale.csv')
+data = pd.read_csv('../../datasets/ready_to_use/preprocessed_impatto_ambientale.csv')
 
 # Separazione tra feature e target
 X = data.drop('PunteggioImpattoAmbientale', axis=1)  # Rimuovo la colonna target
@@ -22,6 +24,8 @@ print(selected_features)
 # Salva il nuovo dataset con le feature selezionate
 selected_data = pd.DataFrame(X_new, columns=selected_features)
 selected_data['PunteggioImpattoAmbientale'] = y  # Riaggiungo la colonna target
-selected_data.to_csv('../../datasets/ready_to_use/for_prediction.csv', index=False)
 
-print("Dataset con feature selezionate salvato come 'for_prediction.csv'.")
+#Prima normalizzo le feature numeriche
+selected_data = normalizza_feature_numeriche(selected_data, "../../training/scaler/scaler.pkl")
+
+selected_data.to_csv('../../datasets/ready_to_use/selected_features_impatto_ambientale.csv', index=False)
