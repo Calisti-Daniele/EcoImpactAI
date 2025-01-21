@@ -4,6 +4,7 @@ from xgboost import XGBRegressor
 from sklearn.metrics import make_scorer, mean_squared_error
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Funzione per calcolare RMSE
 def rmse_scorer(y_true, y_pred):
@@ -44,8 +45,9 @@ models_and_parameters = {
 # Scorer per GridSearchCV
 scorer = make_scorer(rmse_scorer, greater_is_better=False)
 
-# Esecuzione della Grid Search
+# Esecuzione della Grid Search con raccolta dei risultati
 best_models = {}
+cv_results = {}  # Per memorizzare i risultati della validazione incrociata
 for model_name, config in models_and_parameters.items():
     print(f"Grid Search per: {model_name}")
     grid_search = GridSearchCV(
@@ -54,12 +56,30 @@ for model_name, config in models_and_parameters.items():
         scoring=scorer,
         cv=5,
         verbose=3,  # Abilita output dettagliato
-        n_jobs=-1
+        n_jobs=-1,
+        return_train_score=True  # Include i punteggi di training
     )
     grid_search.fit(X_train, y_train)
     best_models[model_name] = grid_search.best_estimator_
+    cv_results[model_name] = grid_search.cv_results_
     print(f"Miglior modello per {model_name}: {grid_search.best_params_}")
     print(f"RMSE: {abs(grid_search.best_score_):.4f}")
+
+# Creazione del grafico
+plt.figure(figsize=(12, 6))
+for model_name, results in cv_results.items():
+    mean_test_rmse = -results["mean_test_score"]  # Converte RMSE negativo in positivo
+    params = range(1, len(mean_test_rmse) + 1)  # Genera una sequenza per ogni iperparametro testato
+    plt.plot(params, mean_test_rmse, marker='o', label=model_name)
+
+plt.title("Prestazioni in termini di RMSE durante la validazione incrociata", fontsize=14)
+plt.xlabel("Configurazioni di iperparametri", fontsize=12)
+plt.ylabel("RMSE medio", fontsize=12)
+plt.legend(title="Modelli")
+plt.grid()
+plt.tight_layout()
+plt.show()
+
 
 # Selezione del miglior modello globale
 best_model_name = min(best_models, key=lambda name: abs(grid_search.best_score_))

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Caricare il dataset
-dataset_path = "../datasets/ready_to_use/selected_features_impatto_ambientale.csv"
+dataset_path = "../datasets/ready_to_use/preprocessed_impatto_ambientale.csv"
 data = load_dataset(dataset_path)
 
 

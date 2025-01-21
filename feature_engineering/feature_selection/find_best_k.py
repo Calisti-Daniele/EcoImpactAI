@@ -2,11 +2,13 @@ from sklearn.feature_selection import SelectKBest, f_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import make_scorer, r2_score
+from xgboost import XGBRegressor
+
 from utilities.functions import *
 import matplotlib.pyplot as plt
 
 # Carica il dataset
-data = load_dataset('../../datasets/ready_to_use/normalized_impatto_ambientale.csv')
+data = load_dataset('../../datasets/ready_to_use/preprocessed_impatto_ambientale.csv')
 
 # Separazione tra feature e target
 X = data.drop('PunteggioImpattoAmbientale', axis=1)
@@ -24,7 +26,14 @@ for k in k_values:
     X_selected = selector.fit_transform(X, y)
 
     # Addestra un modello di regressione lineare
-    model = LinearRegression()
+    model = XGBRegressor(
+        learning_rate=0.1,
+        max_depth=3,
+        n_estimators=200,
+        random_state=42,
+        verbosity=2,
+        booster='gbtree'  # Booster predefinito
+    )
 
     # Valuta il modello con cross-validation
     # Scorer personalizzato per R²
@@ -33,7 +42,7 @@ for k in k_values:
     scores.append(cv_score)
 
     # Aggiorna il miglior k se necessario
-    if cv_score > best_score:
+    if cv_score >= best_score:
         best_score = cv_score
         best_k = k
 
